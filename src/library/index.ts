@@ -5,7 +5,7 @@ const archiver = require('archiver')
 const ora = require('ora')
 const chalk = require('chalk')
 const shelljs = require('shelljs')
-const { NodeSSH } = require('node-ssh')
+const { NodeSSH } = require('dz-node-ssh')
 const getCurrentDate = require('../utils/index')
 
 const ssh = new NodeSSH()
