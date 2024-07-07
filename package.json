@@ -1,0 +1,31 @@
+{
+  "name": "dz-deploy-auto",
+  "version": "1.7.6",
+  "description": "",
+  "main": "dist/dz-dzdone-deploy-auto.js",
+  "scripts": {
+    "build": "webpack"
+  },
+  "bin": {
+    "dz-deploy": "dist/dz-dzExec-deploy-auto.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "archiver": "^5.3.1",
+    "node-ssh": "^13.2.0",
+    "ora": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "chalk": "^4.0.0",
+    "clean-webpack-plugin": "^4.0.0",
+    "shebang-loader": "0.0.1",
+    "ts-loader": "^8.2.0",
+    "typescript": "^5.5.3",
+    "webpack": "^4.47.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-node-externals": "^3.0.0"
+  }
+}
