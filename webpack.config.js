@@ -3,12 +3,9 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const nodeExternals = require('webpack-node-externals')
 
 module.exports = {
-	entry: {
-		dzdone: './src/index.ts',
-		dzExec: './src/executeIndex.ts'
-	},
+	entry: './src/index.ts',
 	output: {
-		filename: 'dz-[name]-deploy-auto.js',
+		filename: 'dz-deploy-auto.js',
 		path: path.join(__dirname, 'dist'),
 		libraryTarget: 'umd',
 		library: 'dz-deploy-auto',

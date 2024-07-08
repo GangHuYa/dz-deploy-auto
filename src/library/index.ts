@@ -120,7 +120,6 @@ const run = async (config: configType) => {
 		await compressFile(sourcePath, destination)
 		await connectServer({ host, username, port, privateKeyValue, serverPath, destination, currentDate })
 		await unzipFile(currentDate, serverPath)
-
 		exec('rm -rf ' + path.join(process.cwd()) + '/' + currentDate + '.zip')
 		exec('rm -rf ' + path.join(process.cwd()) + '/dist')
 		console.timeEnd('totalUseTime')
@@ -143,11 +142,11 @@ const initData = (configPath: string) => {
 	// '../../id_rsa'
 	const commandDir = process.cwd()
 	const config = {
-		host: host || '106.14.188.243',
-		username: username || 'root',
+		host: host || '',
+		username: username || '',
 		port: port || 22,
 		localDistPath,
-		serverPath: serverPath || '/usr/share/nginx/frontCode/',
+		serverPath: serverPath || '',
 		privateKeyValue: fs.readFileSync(path.join(commandDir, privateKeyPath), { encoding: 'utf-8' })
 	}
   run(config)

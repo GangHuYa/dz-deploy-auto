@@ -9,11 +9,3 @@ type configType = {
     serverPath: string;
     privateKeyValue: string;
 };
-type paramsType = {
-    configPath: string;
-};
-declare class DeployPlugin {
-    private options;
-    constructor(options: paramsType);
-    apply(compiler: any): void;
-}
