@@ -1,13 +1,10 @@
 {
   "name": "dz-deploy-auto",
-  "version": "2.0.0",
+  "version": "2.3.5",
   "description": "",
-  "main": "dist/dz-dzdone-deploy-auto.js",
+  "main": "dist/dz-deploy-auto.js",
   "scripts": {
     "build": "webpack"
-  },
-  "bin": {
-    "dz-deploy": "dist/dz-dzExec-deploy-auto.js"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +19,7 @@
     "chalk": "^4.0.0",
     "clean-webpack-plugin": "^4.0.0",
     "shebang-loader": "0.0.1",
+    "shelljs": "^0.8.5",
     "ts-loader": "^8.2.0",
     "typescript": "^5.5.3",
     "webpack": "^4.47.0",

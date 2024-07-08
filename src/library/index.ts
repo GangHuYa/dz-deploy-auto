@@ -4,7 +4,7 @@ const path = require('path')
 const archiver = require('archiver')
 const ora = require('ora')
 const chalk = require('chalk')
-const exec = require('child_process').execSync
+const shelljs = require('shelljs')
 const { NodeSSH } = require('node-ssh')
 const getCurrentDate = require('../utils/index')
 
@@ -120,8 +120,8 @@ const run = async (config: configType) => {
 		await compressFile(sourcePath, destination)
 		await connectServer({ host, username, port, privateKeyValue, serverPath, destination, currentDate })
 		await unzipFile(currentDate, serverPath)
-		exec('rm -rf ' + path.join(process.cwd()) + '/' + currentDate + '.zip')
-		exec('rm -rf ' + path.join(process.cwd()) + '/dist')
+		shelljs.rm('-rf', path.join(process.cwd(), currentDate + '.zip'))
+		shelljs.rm('-rf', path.join(process.cwd(), './dist'))
 		console.timeEnd('totalUseTime')
 	} catch (e) {
 		console.log('e', e)
@@ -141,6 +141,7 @@ const initData = (configPath: string) => {
 	} = JSON.parse(res) || {}
 	// '../../id_rsa'
 	const commandDir = process.cwd()
+	// console.log('keyPath', path.join(commandDir, privateKeyPath))
 	const config = {
 		host: host || '',
 		username: username || '',
