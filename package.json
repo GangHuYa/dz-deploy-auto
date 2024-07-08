@@ -1,6 +1,6 @@
 {
   "name": "dz-deploy-auto",
-  "version": "1.7.8",
+  "version": "1.8.0",
   "description": "",
   "main": "dist/dz-deploy-auto.js",
   "scripts": {
@@ -12,14 +12,14 @@
   "license": "ISC",
   "dependencies": {
     "archiver": "^5.3.1",
-    "node-ssh": "^13.2.0",
+    "dz-node-ssh": "^0.1.0",
     "ora": "^5.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
     "chalk": "^4.0.0",
     "clean-webpack-plugin": "^4.0.0",
-    "dz-node-ssh": "^0.1.0",
+    "shelljs": "^0.8.5",
     "ts-loader": "^8.2.0",
     "typescript": "^5.5.3",
     "webpack": "^4.47.0",
