@@ -49,7 +49,7 @@ const compressFile = (source: string, destination: string) => {
 			console.log('err', err)
 			reject(false)
 		})
-		archive.directory(source, false)
+		archive.directory(source, 'dist')
 		archive.pipe(output)
 		archive.finalize()
 	})
