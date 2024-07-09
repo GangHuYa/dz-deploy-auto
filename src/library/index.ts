@@ -19,6 +19,7 @@ type configType = {
 	serverPath: string; // 要上传的服务器地址
 	privateKeyValue: string; // 私钥
 	isDeleteZip: boolean; // 是否要删除已经上传的zip包
+	isClearPrevFiles: boolean;
 }
 
 type connectType = {
@@ -30,9 +31,16 @@ type connectType = {
 	serverPath: string;
 	destination: string;
 	currentDate: string;
+	isClearPrevFiles: boolean;
 }
 
-const compressFile = (source: string, destination: string) => {
+type initDataType = {
+	configPath: string;
+	isDeleteZip: boolean;
+	isClearPrevFiles: boolean;
+}
+
+const compressFile = (source: string, destination: string, currentDate: string) => {
 	// console.log('source', source, destination)
 	const spinner = ora('compressing files, please wait a moment...').start()
 	const output = fs.createWriteStream(destination)
@@ -49,7 +57,7 @@ const compressFile = (source: string, destination: string) => {
 			console.log('err', err)
 			reject(false)
 		})
-		archive.directory(source, 'dist')
+		archive.directory(source, currentDate)
 		archive.pipe(output)
 		archive.finalize()
 	})
@@ -58,7 +66,7 @@ const compressFile = (source: string, destination: string) => {
 const connectServer = async (config: connectType) => {
 	let spinner = ora('connecting to server...').start()
 	try {
-		const { host, port, username, password, privateKeyValue, serverPath, destination, currentDate } = config
+		const { host, port, username, password, privateKeyValue, serverPath, destination, currentDate, isClearPrevFiles } = config
 		await ssh.connect({
 			host,
 			port,
@@ -68,7 +76,9 @@ const connectServer = async (config: connectType) => {
 		})
 		spinner.succeed(chalk.green('succeed to connect'))
 		try {
-			await ssh.execCommand('rm -rf ./*', { cwd: serverPath })
+			if (isClearPrevFiles) {
+				await ssh.execCommand('rm -rf ./*', { cwd: serverPath })
+			}
 			spinner = ora('start uploading...').start()
 			await ssh.putFile(destination, serverPath + currentDate + '.zip')
 			spinner.succeed(chalk.green('succeed to upload files'))
@@ -117,7 +127,8 @@ const run = async (config: configType) => {
 			localDistPath,
 			serverPath,
 			privateKeyValue,
-			isDeleteZip
+			isDeleteZip,
+			isClearPrevFiles
 		} = config
 		const sourcePath = path.join(process.cwd(), localDistPath)
 		const destination = path.join(process.cwd(), './' + currentDate + '.zip')
@@ -127,8 +138,8 @@ const run = async (config: configType) => {
 			process.exit(0)
 			return false
 		}
-		await compressFile(sourcePath, destination)
-		await connectServer({ host, username, port, password, privateKeyValue, serverPath, destination, currentDate })
+		await compressFile(sourcePath, destination, currentDate)
+		await connectServer({ host, username, port, password, privateKeyValue, serverPath, destination, currentDate, isClearPrevFiles })
 		await unzipFile(currentDate, serverPath, isDeleteZip)
 		shelljs.rm('-rf', path.join(process.cwd(), currentDate + '.zip'))
 		shelljs.rm('-rf', path.join(process.cwd(), './dist'))
@@ -138,9 +149,9 @@ const run = async (config: configType) => {
 		process.exit(0)
 	}
 }
-
-const initData = (configPath: string, isDeleteZip: boolean = false) => {
-  const res = fs.readFileSync(path.join(process.cwd(), configPath), { encoding: 'utf-8' })
+// { configPath, isDeleteZip = false, isClearPrevFiles = false }
+const initData = (parameters: initDataType) => {
+  const res = fs.readFileSync(path.join(process.cwd(), parameters.configPath), { encoding: 'utf-8' })
 	const { 
 		host,
 		username,
@@ -159,7 +170,8 @@ const initData = (configPath: string, isDeleteZip: boolean = false) => {
 		localDistPath,
 		serverPath: serverPath.trim() || '',
 		privateKeyValue: privateKeyPath.trim() ? fs.readFileSync(path.join(commandDir, privateKeyPath), { encoding: 'utf-8' }) : '',
-		isDeleteZip
+		isClearPrevFiles: parameters.isClearPrevFiles,
+		isDeleteZip: parameters.isDeleteZip
 	}
 	if (!config.host) {
 		console.error(chalk.red('Please set host'))
