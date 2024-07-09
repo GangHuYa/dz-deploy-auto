@@ -14,15 +14,18 @@ type configType = {
 	host: string;
 	username: string;
 	port: number;
+	password: string;
 	localDistPath: string; // 项目打包之后的文件夹
 	serverPath: string; // 要上传的服务器地址
 	privateKeyValue: string; // 私钥
+	isDeleteZip: boolean; // 是否要删除已经上传的zip包
 }
 
 type connectType = {
 	host: string;
 	port: number;
 	username: string;
+	password: string;
 	privateKeyValue: string;
 	serverPath: string;
 	destination: string;
@@ -55,17 +58,18 @@ const compressFile = (source: string, destination: string) => {
 const connectServer = async (config: connectType) => {
 	let spinner = ora('connecting to server...').start()
 	try {
-		const { host, port, username, privateKeyValue, serverPath, destination, currentDate } = config
+		const { host, port, username, password, privateKeyValue, serverPath, destination, currentDate } = config
 		await ssh.connect({
 			host,
 			port,
 			username,
+			password,
 			privateKey: privateKeyValue
 		})
 		spinner.succeed(chalk.green('succeed to connect'))
 		try {
-			spinner = ora('start uploading...').start()
 			await ssh.execCommand('rm -rf ./*', { cwd: serverPath })
+			spinner = ora('start uploading...').start()
 			await ssh.putFile(destination, serverPath + currentDate + '.zip')
 			spinner.succeed(chalk.green('succeed to upload files'))
 		} catch (e) {
@@ -80,11 +84,15 @@ const connectServer = async (config: connectType) => {
 	}
 }
 
-const unzipFile = async (currentDate: string, serverPath: string) => {
+const unzipFile = async (currentDate: string, serverPath: string, isDeleteZip: boolean = false) => {
 	const spinner = ora('start unzipping...').start()
 	try {
-		const command = `unzip ./${currentDate}.zip; rm -rf ./${currentDate}.zip`
+		const command = `unzip ./${currentDate}.zip`
 		await ssh.execCommand(command, { cwd: serverPath })
+		if (isDeleteZip) {
+			const deleteCommand = `rm -rf ./${currentDate}.zip`
+			await ssh.execCommand(deleteCommand, { cwd: serverPath })
+		}
 		// console.log('result', result)
 		spinner.succeed(chalk.green('succeed to unzip and deploy successfully '))
 	} catch (e) {
@@ -97,7 +105,7 @@ const unzipFile = async (currentDate: string, serverPath: string) => {
 }
 
 const run = async (config: configType) => {
-	console.time('totalUseTime')
+	console.time('totalUsedTime')
 	const currentDate = getCurrentDate()
 	try {
 		// console.log('currentDate', currentDate)
@@ -105,9 +113,11 @@ const run = async (config: configType) => {
 			host,
 			username,
 			port,
+			password,
 			localDistPath,
 			serverPath,
-			privateKeyValue
+			privateKeyValue,
+			isDeleteZip
 		} = config
 		const sourcePath = path.join(process.cwd(), localDistPath)
 		const destination = path.join(process.cwd(), './' + currentDate + '.zip')
@@ -118,18 +128,18 @@ const run = async (config: configType) => {
 			return false
 		}
 		await compressFile(sourcePath, destination)
-		await connectServer({ host, username, port, privateKeyValue, serverPath, destination, currentDate })
-		await unzipFile(currentDate, serverPath)
+		await connectServer({ host, username, port, password, privateKeyValue, serverPath, destination, currentDate })
+		await unzipFile(currentDate, serverPath, isDeleteZip)
 		shelljs.rm('-rf', path.join(process.cwd(), currentDate + '.zip'))
 		shelljs.rm('-rf', path.join(process.cwd(), './dist'))
-		console.timeEnd('totalUseTime')
+		console.timeEnd('totalUsedTime')
 	} catch (e) {
 		console.log('e', e)
 		process.exit(0)
 	}
 }
 
-const initData = (configPath: string) => {
+const initData = (configPath: string, isDeleteZip: boolean = false) => {
   const res = fs.readFileSync(path.join(process.cwd(), configPath), { encoding: 'utf-8' })
 	const { 
 		host,
@@ -137,18 +147,38 @@ const initData = (configPath: string) => {
 		port = 22,
 		localDistPath = './dist/',
 		serverPath,
-		privateKeyPath
+		privateKeyPath,
+		password
 	} = JSON.parse(res) || {}
-	// '../../id_rsa'
 	const commandDir = process.cwd()
-	// console.log('keyPath', path.join(commandDir, privateKeyPath))
 	const config = {
-		host: host || '',
+		host: host.trim() || '',
 		username: username || '',
+		password: password.trim(),
 		port: port || 22,
 		localDistPath,
-		serverPath: serverPath || '',
-		privateKeyValue: fs.readFileSync(path.join(commandDir, privateKeyPath), { encoding: 'utf-8' })
+		serverPath: serverPath.trim() || '',
+		privateKeyValue: privateKeyPath.trim() ? fs.readFileSync(path.join(commandDir, privateKeyPath), { encoding: 'utf-8' }) : '',
+		isDeleteZip
+	}
+	if (!config.host) {
+		console.error(chalk.red('Please set host'))
+		return process.exit(0)
+	}
+	if (!config.password && !config.privateKeyValue) {
+		console.error(chalk.red('password or privateKeyPath is not found'))
+		return process.exit(0)
+	}
+	if (!config.serverPath) {
+		console.error(chalk.red('Please set serverPath'))
+		return process.exit(0)
+	}
+	if (config.serverPath === '/') {
+		console.error(chalk.red('serverPath must not be set to /'))
+		return process.exit(0)
+	}
+	if (!/.*\/$/.test(config.serverPath)) {
+		config.serverPath = config.serverPath + '/'
 	}
   run(config)
 }

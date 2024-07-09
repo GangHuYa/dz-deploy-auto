@@ -1,6 +1,6 @@
 {
   "name": "dz-deploy-auto",
-  "version": "1.8.0",
+  "version": "1.8.5",
   "description": "",
   "main": "dist/dz-deploy-auto.js",
   "scripts": {
