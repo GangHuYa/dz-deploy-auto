@@ -159,7 +159,7 @@ const initData = (parameters: initDataType) => {
 		localDistPath = './dist/',
 		serverPath,
 		privateKeyPath,
-		password
+		password = ''
 	} = JSON.parse(res) || {}
 	const commandDir = process.cwd()
 	const config = {
