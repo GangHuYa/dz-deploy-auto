@@ -49,7 +49,7 @@ const compressFile = (source: string, destination: string, currentDate: string) 
 	})
 	return new Promise((resolve, reject) => {
 		output.on('close', () => {
-			spinner.succeed(chalk.green('succeed to compress files'))
+			spinner.succeed(chalk.green('succeed in compressing files'))
 			resolve(true)
 		})
 		archive.on('error', (err: any) => {
@@ -74,14 +74,14 @@ const connectServer = async (config: connectType) => {
 			password,
 			privateKey: privateKeyValue
 		})
-		spinner.succeed(chalk.green('succeed to connect'))
+		spinner.succeed(chalk.green('succeed in connecting'))
 		try {
 			if (isClearPrevFiles) {
 				await ssh.execCommand('rm -rf ./*', { cwd: serverPath })
 			}
 			spinner = ora('start uploading...').start()
 			await ssh.putFile(destination, serverPath + currentDate + '.zip')
-			spinner.succeed(chalk.green('succeed to upload files'))
+			spinner.succeed(chalk.green('succeed in uploading files'))
 		} catch (e) {
 			console.log('e', e)
 			spinner.fail(chalk.red('failed to upload files'))
@@ -104,7 +104,7 @@ const unzipFile = async (currentDate: string, serverPath: string, isDeleteZip: b
 			await ssh.execCommand(deleteCommand, { cwd: serverPath })
 		}
 		// console.log('result', result)
-		spinner.succeed(chalk.green('succeed to unzip and deploy successfully '))
+		spinner.succeed(chalk.green('succeed in unzip and deploy successfully '))
 	} catch (e) {
 		spinner.fail(chalk.red('failed to unzip'))
 		console.log('e', e)
