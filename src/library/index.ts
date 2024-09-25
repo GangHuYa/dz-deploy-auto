@@ -20,6 +20,7 @@ type configType = {
 	privateKeyValue: string; // 私钥
 	isDeleteZip: boolean; // 是否要删除已经上传的zip包
 	isClearPrevFiles: boolean;
+	isRewriteDirectoryName: boolean;
 }
 
 type connectType = {
@@ -38,6 +39,7 @@ type initDataType = {
 	configPath: string;
 	isDeleteZip: boolean;
 	isClearPrevFiles: boolean;
+	isRewriteDirectoryName: boolean;
 }
 
 const compressFile = (source: string, destination: string, currentDate: string) => {
@@ -128,10 +130,11 @@ const run = async (config: configType) => {
 			serverPath,
 			privateKeyValue,
 			isDeleteZip,
-			isClearPrevFiles
+			isClearPrevFiles,
+			isRewriteDirectoryName
 		} = config
 		const sourcePath = path.join(process.cwd(), localDistPath)
-		const destination = path.join(process.cwd(), './' + currentDate + '.zip')
+		const destination = path.join(process.cwd(), './' + (isRewriteDirectoryName ? currentDate : localDistPath) + '.zip')
 
 		if (!fs.existsSync(sourcePath)) {
 			console.log(chalk.red('no file or directory is found'))
@@ -171,7 +174,8 @@ const initData = (parameters: initDataType) => {
 		serverPath: serverPath.trim() || '',
 		privateKeyValue: privateKeyPath.trim() ? fs.readFileSync(path.join(commandDir, privateKeyPath), { encoding: 'utf-8' }) : '',
 		isClearPrevFiles: parameters.isClearPrevFiles,
-		isDeleteZip: parameters.isDeleteZip
+		isDeleteZip: parameters.isDeleteZip,
+		isRewriteDirectoryName: parameters.isRewriteDirectoryName
 	}
 	if (!config.host) {
 		console.error(chalk.red('Please set host'))
